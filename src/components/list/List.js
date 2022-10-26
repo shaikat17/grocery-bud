@@ -7,6 +7,7 @@ const List = (props) => {
     <div className="grocery-list">
       {props.items.map((item) => {
         const { id, title } = item;
+        // console.log(item)
         // console.log(title);
         return (
           <article className="grocery-item" key={id}>
@@ -15,7 +16,7 @@ const List = (props) => {
               <button className="edit-btn" type="button">
                 <FaEdit />
               </button>
-              <button className="delete-btn" type="button">
+              <button className="delete-btn" onClick={() => props.removeItem(id)} type="button">
                 <FaTrash />
               </button>
             </div>
