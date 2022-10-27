@@ -1,7 +1,17 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 import List from "./components/list/List";
 import Alert from "./components/alert/Alert";
+
+const getLocalStorage = () => {
+  const list = localStorage.getItem('list')
+
+  if (list) {
+    return JSON.parse(list)
+  } else {
+    return []
+  }
+}
 
 function App() {
   const [name, setName] = useState("");
@@ -10,6 +20,9 @@ function App() {
   const [editID, setEditID] = useState(null);
   const [alert, setAlert] = useState({ show: false, msg: "", type: "" });
 
+  useEffect(() => {
+    localStorage.setItem('list', JSON.stringify(list))
+  }, [list])
   const showAlert = (show = false, msg = "", type = "") => {
     setAlert({ show, msg, type });
   };
@@ -24,12 +37,30 @@ function App() {
     setList(list.filter((item) => item.id !== id))
   }
 
+  const editItem = (id) => {
+    const specificItem = list.find ((item) => item.id === id)
+    console.log(specificItem)
+    setIsEditing(true)
+    setEditID(id)
+    setName(specificItem.title)
+  }
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
     if (!name) {
       showAlert(true, "Please Enter Value.", "danger");
     } else if (name && isEditing) {
+      setList(list.map((item) => {
+        if(item.id === editID) {
+          return {...item, title: name}
+        }
+        return item
+      }))
+      setName('')
+      setEditID(null)
+      setIsEditing(false)
+      showAlert(true, 'Item Edited Successfully', 'success')
     } else {
       const newItem = { id: new Date().getTime().toString(), title: name };
       setList([...list, newItem]);
@@ -60,7 +91,7 @@ function App() {
 
       {list.length > 0 && (
         <div className="grocery-container">
-          <List items={list} removeItem={removeItem}/>
+          <List items={list} removeItem={removeItem} editItem={editItem} />
           <button className="clear-btn" onClick={clearList}>Clear Items</button>
         </div>
       )}
